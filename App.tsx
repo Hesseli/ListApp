@@ -1,62 +1,12 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import { StatusBar } from 'expo-status-bar'
-import { StyleSheet, View, SafeAreaView, Text, Alert } from 'react-native'
-import { Todo } from './components/TodoItem'
+import { StyleSheet, View, SafeAreaView, Text } from 'react-native'
 import TodoList from './components/TodoList'
 import AddTodoForm from './components/AddTodoForm'
-import { TodoStorageService } from './services/TodoStorageService'
+import { useTodos } from './hooks/useTodos'
 
 export default function App() {
-  const [todos, setTodos] = useState<Todo[]>([])
-  const [loading, setLoading] = useState(true)
-
-  // Load todos from storage on app startup
-  useEffect(() => {
-    loadTodos()
-  }, [])
-
-  // Save todos to storage whenever todos change
-  useEffect(() => {
-    if (!loading) {
-      saveTodos()
-    }
-  }, [todos, loading])
-
-  const loadTodos = async () => {
-    try {
-      const storedTodos = await TodoStorageService.loadTodos()
-      setTodos(storedTodos)
-    } catch (error) {
-      Alert.alert('Error', 'Failed to load todos')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const saveTodos = async () => {
-    try {
-      await TodoStorageService.saveTodos(todos)
-    } catch (error) {
-      Alert.alert('Error', 'Failed to save todos')
-    }
-  }
-
-  const addTodo = (text: string) => {
-    const newTodo: Todo = {
-      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-      text: text,
-      completed: false,
-    }
-    setTodos(prevTodos => [newTodo, ...prevTodos])
-  }
-
-  const toggleTodo = (id: string) => {
-    setTodos(prevTodos =>
-      prevTodos.map(todo =>
-        todo.id === id ? { ...todo, completed: !todo.completed } : todo
-      )
-    )
-  }
+  const { todos, loading, addTodo, toggleTodo } = useTodos()
 
   if (loading) {
     return (
